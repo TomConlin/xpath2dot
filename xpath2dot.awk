@@ -7,6 +7,8 @@
 #  this script transforms a list of xpaths into a GraphViz dot file
 #  to capture the relations between elements expressed in the xpaths
 
+
+
 # C symbols are limited to upper+lower+digits+underscore
 # should be < 32 long and not begin with a digit
 # but we are not enforcing inital char or length here
@@ -16,8 +18,14 @@ function sanitize(var){
 	gsub(/[ !"#$%&'()*+,\-./:;<=>?@[\\\]\^_`{|}~]+/, "_", var);
 	return var
 }
- 
+
 BEGIN{
+	# graphs can be oriented verticaly  up/down (UD)
+	# or horizontaly left/right (LR)  which is the default here
+	# to change default on command line include
+	# -v ORIENT="UD"
+	if(! ORIENT)
+		ORIENT="LR"
 	FS="/";
 }
 
@@ -30,11 +38,7 @@ NF > 1 {
 	if(1 == match($NF, "@")){
 		att = sanitize(substr($NF,2));
 		leaf = sanitize($(NF-1));
-		if(node[leaf] != 0){
-			node[leaf] = node[leaf] " | " att
-		} else {
-			node[leaf] = att
-		}
+		node[leaf][att]++  # gathering but not using attribute usage counts
 	} else {
 		# storing edges in an assocative array means parallel edges collapse
 		edge[sanitize($(NF-1)) " -> " sanitize($(NF)) ]++;
@@ -43,13 +47,17 @@ NF > 1 {
 
 END{
 	print "digraph{"
-	print "rankdir=LR; charset=\"utf-8\";"
+	print "rankdir=" ORIENT "; charset=\"utf-8\";"
 	for(n in node){
-		print n " [label = \"{<" n "> " n " | " node[n] "}\" shape = \"record\"];"
+		attributes = ""
+		for(a in node[n]){
+			attributes = attributes "|" a
+		}
+		print n " [label = \"{<" n "> " n "|" substr(attributes,2) "}\" shape = \"record\"];"
 	}
 	# note well
 	# edge weight relates to _reuse_ of element names within the xml schema
 	# and not reuse of a particular element
 	for(e in edge){print e " [penwidth = \"" edge[e] "\"];"}
-	print"}"
+	print "}"
 }
