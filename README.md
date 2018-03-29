@@ -3,7 +3,7 @@
 
 
 Started as a [question on Stack Overflow](https://stackoverflow.com/questions/36327815/converting-random-xml-file-to-tree-diagram/36349048#36349048)
-but now gets used enough to keep around.
+a couple of years ago but now gets used often enough to keep around.
 
 ### Requirements:
  -  A way to generate [xpaths](https://en.wikipedia.org/wiki/XPath)
