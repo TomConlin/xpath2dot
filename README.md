@@ -22,4 +22,4 @@ curl -s ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/sample_xml/RCV000077146.xml |
 ### Result:
 
 
-![Example xpath2dot output](https://raw.githubusercontent.com/TomConlin/xpath2dot/master/xpath2dot_demo.png.png)
+![Example xpath2dot output](https://raw.githubusercontent.com/TomConlin/xpath2dot/master/xpath2dot_demo.png)
