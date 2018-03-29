@@ -9,9 +9,9 @@ but now gets used enough to keep around.
  -  A way to generate [xpaths](https://en.wikipedia.org/wiki/XPath)
  from am XML file I use [xmlstarlet](https://en.wikipedia.org/wiki/XMLStarlet)
  -  This xpath2dot [awk](https://en.wikipedia.org/wiki/AWK) script.
- -  A way to directly view or convert to image a [Graphvix dot file](https://en.wikipedia.org/wiki/Graphviz)
+ -  A way to directly view or convert to image a [Graphviz dot file](https://en.wikipedia.org/wiki/Graphviz)
 
-### Usage:
+### Simple Usage:
 
 
 ```
@@ -23,3 +23,17 @@ curl -s ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/sample_xml/RCV000077146.xml |
 
 
 ![Example xpath2dot output](https://raw.githubusercontent.com/TomConlin/xpath2dot/master/xpath2dot_demo.png)
+
+
+### More Usage:
+
+Include XML attributes and change orientation to vertical
+
+```
+curl -s ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/sample_xml/RCV000077146.xml |\
+ xmlstarlet el -a | sort -u | xpath2dot.awk -v ORIENT="UD" |\
+  dot -T png > xpath2dot_demo_att.png
+```
+### Result:
+
+![Example xpath2dot with attributes output](https://raw.githubusercontent.com/TomConlin/xpath2dot/master/xpath2dot_demo_att.png)
