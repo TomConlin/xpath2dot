@@ -1,13 +1,17 @@
 #! /usr/bin/awk -f
 
 #  xpath2dot.awk
+#
+# usage:
+#   xmlstarlet el -a file.xml | sort -u | xpath2dot.awk > file.dot
+#   xmlstarlet el -a file.xml | sort -u | xpath2dot.awk -v ORIENT="UD" > file.dot
 
-#  xpaths describe how to address an element in an xml document
-#  xmlstarlet can emit all the xpaths from an xml document
-#  this script transforms a list of xpaths into a GraphViz dot file
-#  to capture the relations between elements expressed in the xpaths
-
-
+# xpaths describe how to address an element in an xml document
+# xmlstarlet can emit all the xpaths from an xml document
+# this script transforms a list of xpaths into a GraphViz dot file
+# to capture the relations between elements expressed in the xpaths.
+#
+# note: Any other method you use to generate xpaths should work as well
 
 # C symbols are limited to upper+lower+digits+underscore
 # should be < 32 long and not begin with a digit
@@ -16,8 +20,10 @@
 # so they can be used as node labels in dot
 function sanitize(var){
 	gsub(/[ !"#$%&'()*+,\-./:;<=>?@[\\\]\^_`{|}~]+/, "_", var);
-	return var
+	return "\"" var "\""
 }
+
+
 
 BEGIN{
 	# graphs can be oriented verticaly  up/down (UD)
@@ -27,6 +33,7 @@ BEGIN{
 	if(! ORIENT)
 		ORIENT="LR"
 	FS="/";
+    penmax=10  # max penwidth
 }
 
 # xpaths with at least two elements will be either:
@@ -41,12 +48,20 @@ NF > 1 {
 		node[leaf][att]++  # gathering but not using attribute usage counts
 	} else {
 		# storing edges in an assocative array means parallel edges collapse
-		edge[sanitize($(NF-1)) " -> " sanitize($(NF)) ]++;
+		edge[sanitize($(NF-1)) " -> " sanitize($(NF))]++;
 	}
 }
 
 END{
+    # find edge (node pair) with greatest count for scaling if need be
+    # may need more tweaking
+    x = asort(edge,ma)
+    norm = ma[x]
+    if(norm < 1.0) norm = 1.0
+    if(penmax && (norm > penmax)) norm = norm / penmax
+
 	print "digraph{"
+	print "overlap=false"
 	print "rankdir=" ORIENT "; charset=\"utf-8\";"
 	for(n in node){
 		attributes = ""
@@ -56,8 +71,10 @@ END{
 		print n " [label = \"{<" n "> " n "|" substr(attributes,2) "}\" shape = \"record\"];"
 	}
 	# note well
-	# edge weight relates to _reuse_ of element names within the xml schema
+	# edge weight relates to _reuse_ of element name pairs within the xml schema
 	# and not reuse of a particular element
-	for(e in edge){print e " [penwidth = \"" edge[e] "\"];"}
+	for(e in edge){
+	    print e " [penwidth = \""(edge[e]/norm) "\", weight = \"" edge[e] "\"];"
+	}
 	print "}"
 }
