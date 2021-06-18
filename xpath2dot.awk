@@ -18,9 +18,10 @@
 # but we are not enforcing inital char or length here
 # just replacing runs of non-alphanums with underscore
 # so they can be used as node labels in dot
+# quoting allows spaces in names but causes other problems
 function sanitize(var){
 	gsub(/[ !"#$%&'()*+,\-./:;<=>?@[\\\]\^_`{|}~]+/, "_", var);
-	return "\"" var "\""
+	return var
 }
 
 
@@ -60,7 +61,7 @@ END{
     if(norm < 1.0) norm = 1.0
     if(penmax && (norm > penmax)) norm = norm / penmax
 
-	print "digraph{"
+	print "digraph G{"
 	print "overlap=false"
 	print "rankdir=" ORIENT "; charset=\"utf-8\";"
 	for(n in node){
